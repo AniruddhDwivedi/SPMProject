@@ -1,0 +1,90 @@
+QMainWindow {
+    background-color: #f5f6fa;
+}
+
+QWidget {
+    font-family: "DejaVu Sans";
+    font-size: 14px;
+}
+
+QLabel#title {
+    font-size: 26px;
+    font-weight: bold;
+}
+
+QLabel#subtitle {
+    font-size: 18px;
+}
+
+QLabel#page_title {
+    font-size: 26px;
+    font-weight: bold;
+}
+
+QFrame#login_card {
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+QFrame#dashboard_card {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+}
+
+QLabel#card_value {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+QLineEdit {
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+}
+
+QPushButton {
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #2f6fed;
+    color: white;
+}
+
+QPushButton:hover {
+    background-color: #2458b8;
+}
+
+QWidget#sidebar {
+    background-color: #1f2937;
+    min-width: 220px;
+    max-width: 220px;
+}
+
+QLabel#sidebar_title {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+QPushButton#sidebar_button {
+    background-color: transparent;
+    color: white;
+    text-align: left;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+QPushButton#sidebar_button:hover {
+    background-color: #374151;
+}
+
+QPushButton#sidebar_button:checked {
+    background-color: #2f6fed;
+}
+
+QPushButton#logout_button {
+    background-color: #dc2626;
+    color: white;
+}
