@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle(
-            "Inter IIT Tournament Management System"
+            "Inter VIT Tournament Management System"
         )
 
         self.resize(1200, 750)
