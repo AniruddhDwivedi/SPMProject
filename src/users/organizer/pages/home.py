@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QLabel,
 )
-
+from src.components.wave_heading import WaveHeading
 
 class OrganizerHomePage(QWidget):
 
@@ -12,11 +12,11 @@ class OrganizerHomePage(QWidget):
 
         layout = QVBoxLayout(self)
 
-        title = QLabel("Organizer Dashboard")
+        title = WaveHeading("Organizer Dashboard")
         title.setObjectName("page_title")
 
         welcome = QLabel(
-            f"Welcome, {user['name']}!"
+            f"Welcome, {user.username}!"
         )
 
         layout.addWidget(title)

@@ -6,7 +6,7 @@ from src.main_window import MainWindow
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName(
-        "Inter IIT Tournament Management System"
+        "Inter VIT Tournament Management System"
     )
 
     stylesheet_path = (

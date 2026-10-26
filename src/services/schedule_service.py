@@ -1,41 +1,26 @@
-class ScheduleService:
+from src.services.supabase_client import supabase
 
+
+class ScheduleService:
     def get_matches(self):
-        return [
-            {
-                "id": 1,
-                "sport": "Football",
-                "team_a": "VIT AP",
-                "team_b": "VIT Vellore",
-                "date": "Dec 12, 2026",
-                "venue": "Ground 1",
-                "status": "Scheduled",
-            },
-            {
-                "id": 2,
-                "sport": "Cricket",
-                "team_a": "VIT Vellore",
-                "team_b": "VIT Chennai",
-                "date": "Dec 13, 2026",
-                "venue": "Main Stadium",
-                "status": "Scheduled",
-            },
-            {
-                "id": 3,
-                "sport": "Basketball",
-                "team_a": "VIT Chennai",
-                "team_b": "VIT Vellore",
-                "date": "Dec 14, 2026",
-                "venue": "Basketball Court",
-                "status": "Scheduled",
-            },
-            {
-                "id": 4,
-                "sport": "Badminton",
-                "team_a": "VIT AP",
-                "team_b": "VIT Chennai",
-                "date": "Dec 15, 2026",
-                "venue": "Indoor Hall",
-                "status": "Scheduled",
-            },
-        ]
+        response = (
+            supabase
+            .table("matches")
+            .select("*")
+            .order("match_date")
+            .order("match_time")
+            .execute()
+        )
+
+        return response.data or []
+
+    def get_sports(self):
+        matches = self.get_matches()
+
+        sports = {
+            match["sport"]
+            for match in matches
+            if match.get("sport")
+        }
+
+        return sorted(sports)

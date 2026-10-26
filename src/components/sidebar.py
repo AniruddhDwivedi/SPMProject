@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QFrame,
 )
-
+from src.components.wave_heading import WaveHeading
 
 class Sidebar(QWidget):
 
@@ -21,7 +21,7 @@ class Sidebar(QWidget):
         layout.setContentsMargins(15, 20, 15, 20)
         layout.setSpacing(8)
 
-        title_label = QLabel(title)
+        title_label = WaveHeading(title)
         title_label.setObjectName("sidebar_title")
 
         layout.addWidget(title_label)

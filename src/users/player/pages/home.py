@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QFrame,
 )
-
+from src.components.wave_heading import WaveHeading
 
 class PlayerHomePage(QWidget):
 
@@ -22,8 +22,8 @@ class PlayerHomePage(QWidget):
         title = QLabel("Dashboard")
         title.setObjectName("page_title")
 
-        welcome = QLabel(
-            f"Welcome, {self.user['name']}!"
+        welcome = WaveHeading(
+            f"Welcome, {self.user.username}!"
         )
 
         layout.addWidget(title)

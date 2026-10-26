@@ -1,4 +1,3 @@
-from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -7,182 +6,144 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QTableWidget,
     QTableWidgetItem,
-    QPushButton,
     QHeaderView,
 )
 
+from src.services.schedule_service import ScheduleService
+
 
 class ScheduleTable(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
-    match_selected = pyqtSignal(dict)
+        self.schedule_service = ScheduleService()
 
-    def __init__(self, editable=False):
-        super().__init__()
+        # Load matches from Supabase
+        self.matches = self.schedule_service.get_matches()
 
-        self.editable = editable
-        self.matches = []
+        # Main layout
+        self.layout = QVBoxLayout(self)
 
-        self.setup_ui()
+        # -------------------------
+        # Filter
+        # -------------------------
 
-    def setup_ui(self):
-        layout = QVBoxLayout(self)
+        filter_layout = QHBoxLayout()
 
-        # Filters
-        filters = QHBoxLayout()
-
-        filters.addWidget(QLabel("Sport:"))
+        filter_label = QLabel("Filter by sport:")
 
         self.sport_filter = QComboBox()
         self.sport_filter.addItem("All Sports")
 
-        self.sport_filter.currentTextChanged.connect(
-            self.filter_matches
+        # get_sports() returns strings
+        self.sport_filter.addItems(
+            self.schedule_service.get_sports()
         )
 
-        filters.addWidget(self.sport_filter)
-        filters.addStretch()
+        self.sport_filter.currentTextChanged.connect(
+            self.refresh_table
+        )
 
-        layout.addLayout(filters)
+        filter_layout.addWidget(filter_label)
+        filter_layout.addWidget(self.sport_filter)
+        filter_layout.addStretch()
 
+        self.layout.addLayout(filter_layout)
+
+        # -------------------------
         # Table
+        # -------------------------
+
         self.table = QTableWidget()
 
-        self.table.setColumnCount(6)
+        self.table.setColumnCount(7)
 
-        self.table.setHorizontalHeaderLabels([
-            "Sport",
-            "Team A",
-            "Team B",
-            "Date",
-            "Venue",
-            "Status",
-        ])
+        self.table.setHorizontalHeaderLabels(
+            [
+                "Sport",
+                "Team A",
+                "Team B",
+                "Date",
+                "Time",
+                "Venue",
+                "Status",
+            ]
+        )
+
+        # Read-only table
+        self.table.setEditTriggers(
+            QTableWidget.EditTrigger.NoEditTriggers
+        )
 
         self.table.setSelectionBehavior(
             QTableWidget.SelectionBehavior.SelectRows
         )
 
-        self.table.setEditTriggers(
-            QTableWidget.EditTrigger.NoEditTriggers
+        self.table.setSelectionMode(
+            QTableWidget.SelectionMode.SingleSelection
         )
 
-        self.table.horizontalHeader().setSectionResizeMode(
+        # Stretch columns
+        header = self.table.horizontalHeader()
+
+        header.setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
 
-        layout.addWidget(self.table)
+        self.layout.addWidget(self.table)
 
-        # Organizer actions
-        if self.editable:
-            actions = QHBoxLayout()
+        # Populate table
+        self.refresh_table()
 
-            self.add_button = QPushButton("Add Match")
-            self.edit_button = QPushButton("Edit Match")
-            self.delete_button = QPushButton("Delete Match")
-
-            actions.addWidget(self.add_button)
-            actions.addWidget(self.edit_button)
-            actions.addWidget(self.delete_button)
-
-            layout.addLayout(actions)
-
-            self.edit_button.clicked.connect(
-                self.edit_selected_match
-            )
-
-            self.delete_button.clicked.connect(
-                self.delete_selected_match
-            )
-
-    def set_matches(self, matches):
-        self.matches = matches
-
-        sports = sorted({
-            match["sport"]
-            for match in matches
-        })
-
-        self.sport_filter.blockSignals(True)
-
-        self.sport_filter.clear()
-        self.sport_filter.addItem("All Sports")
-        self.sport_filter.addItems(sports)
-
-        self.sport_filter.blockSignals(False)
-
-        self.filter_matches()
-
-    def filter_matches(self):
+    def refresh_table(self):
         selected_sport = self.sport_filter.currentText()
 
+        # -------------------------
+        # Filter matches
+        # -------------------------
+
         if selected_sport == "All Sports":
-            filtered = self.matches
+            visible_matches = self.matches
 
         else:
-            filtered = [
+            visible_matches = [
                 match
                 for match in self.matches
-                if match["sport"] == selected_sport
+                if match.get("sport") == selected_sport
             ]
 
-        self.populate_table(filtered)
+        # -------------------------
+        # Populate table
+        # -------------------------
 
-    def populate_table(self, matches):
-        self.table.setRowCount(0)
+        self.table.setRowCount(len(visible_matches))
 
-        for match in matches:
-            row = self.table.rowCount()
-            self.table.insertRow(row)
+        for row, match in enumerate(visible_matches):
+
+            match_date = match.get("match_date", "")
+            match_time = match.get("match_time", "")
+
+            # Supabase may return time as HH:MM:SS.
+            # We only display HH:MM.
+            if isinstance(match_time, str) and len(match_time) >= 5:
+                match_time = match_time[:5]
 
             values = [
-                match["sport"],
-                match["team_a"],
-                match["team_b"],
-                match["date"],
-                match["venue"],
-                match["status"],
+                match.get("sport", ""),
+                match.get("team_a", ""),
+                match.get("team_b", ""),
+                match_date,
+                match_time,
+                match.get("venue", ""),
+                match.get("status", ""),
             ]
 
             for column, value in enumerate(values):
+
                 item = QTableWidgetItem(str(value))
 
-                item.setTextAlignment(
-                    Qt.AlignmentFlag.AlignCenter
+                self.table.setItem(
+                    row,
+                    column,
+                    item,
                 )
-
-                self.table.setItem(row, column, item)
-
-    def get_selected_match(self):
-        selected_rows = self.table.selectionModel().selectedRows()
-
-        if not selected_rows:
-            return None
-
-        row = selected_rows[0].row()
-
-        sport = self.table.item(row, 0).text()
-        team_a = self.table.item(row, 1).text()
-        team_b = self.table.item(row, 2).text()
-
-        for match in self.matches:
-            if (
-                match["sport"] == sport
-                and match["team_a"] == team_a
-                and match["team_b"] == team_b
-            ):
-                return match
-
-        return None
-
-    def edit_selected_match(self):
-        match = self.get_selected_match()
-
-        if match:
-            self.match_selected.emit(match)
-
-    def delete_selected_match(self):
-        match = self.get_selected_match()
-
-        if match:
-            self.matches.remove(match)
-            self.filter_matches()

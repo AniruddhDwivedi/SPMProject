@@ -10,7 +10,8 @@ from src.components.sidebar import Sidebar
 from src.users.player.pages.home import PlayerHomePage
 from src.users.player.pages.schedule import PlayerSchedulePage
 from src.users.player.pages.scoreboard import PlayerScoreboardPage
-
+from src.users.player.pages.kits import PlayerKitsPage
+from src.components.wave_heading import WaveHeading
 
 class PlayerDashboard(QWidget):
 
@@ -27,11 +28,12 @@ class PlayerDashboard(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.sidebar = Sidebar(
-            "IITMS Player",
+            "VITMS Player",
             [
                 ("home", "Dashboard"),
                 ("schedule", "View Schedule"),
                 ("scoreboard", "View Scoreboard"),
+                ("kits", "Request Kit"),
             ],
         )
 
@@ -41,6 +43,7 @@ class PlayerDashboard(QWidget):
             "home": PlayerHomePage(self.user),
             "schedule": PlayerSchedulePage(),
             "scoreboard": PlayerScoreboardPage(),
+            "kits": PlayerKitsPage()
         }
 
         for page in self.pages.values():

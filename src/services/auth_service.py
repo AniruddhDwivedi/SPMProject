@@ -1,26 +1,48 @@
+from src.services.supabase_client import supabase
+from src.models.user import User
+
+
 class AuthService:
-    def __init__(self):
-        self.users = {
-            "player": {
-                "password": "player123",
-                "role": "player",
-                "name": "Demo Player",
-            },
-            "organizer": {
-                "password": "organizer123",
-                "role": "organizer",
-                "name": "Demo Organizer",
-            },
-        }
 
-    def login(self, username, password):
-        user = self.users.get(username)
+    def login(self, email, password):
+        try:
+            response = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": password,
+            })
 
-        if user and user["password"] == password:
-            return {
-                "username": username,
-                "role": user["role"],
-                "name": user["name"],
-            }
+            auth_user = response.user
 
-        return None
+            if auth_user is None:
+                print("AUTH: No user returned")
+                return None
+
+            print("AUTH: Login successful")
+            print("AUTH USER ID:", auth_user.id)
+            print("AUTH EMAIL:", auth_user.email)
+
+            profile_response = (
+                supabase
+                .table("users")
+                .select("id, username, role")
+                .eq("id", auth_user.id)
+                .single()
+                .execute()
+            )
+
+            profile = profile_response.data
+
+            print("PROFILE:", profile)
+
+            if profile is None:
+                print("AUTH: No profile found")
+                return None
+
+            return User(
+                username=profile["username"],
+                role=profile["role"],
+            )
+
+        except Exception as e:
+            print("AUTH ERROR:", repr(e))
+            return None

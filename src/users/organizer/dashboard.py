@@ -6,11 +6,12 @@ from PyQt6.QtWidgets import (
 )
 
 from src.components.sidebar import Sidebar
-
+from src.users.organizer.pages.player_reporting import PlayerReportingPage
 from src.users.organizer.pages.home import OrganizerHomePage
 from src.users.organizer.pages.schedule import OrganizerSchedulePage
 from src.users.organizer.pages.scoreboard import OrganizerScoreboardPage
-
+from src.users.organizer.pages.complaints import OrganizerComplaintsPage
+from src.users.organizer.pages.kits import OrganizerKitsPage
 
 class OrganizerDashboard(QWidget):
 
@@ -27,11 +28,14 @@ class OrganizerDashboard(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.sidebar = Sidebar(
-            "IITMS Organizer",
+            "VITMS Organizer",
             [
                 ("home", "Dashboard"),
                 ("schedule", "Manage Schedule"),
                 ("scoreboard", "Update Scoreboard"),
+                ("player_reporting", "Player Reporting"),
+                ("complaints", "Complaints"),
+                ("player_kits", "Player Kits")
             ],
         )
 
@@ -41,6 +45,9 @@ class OrganizerDashboard(QWidget):
             "home": OrganizerHomePage(self.user),
             "schedule": OrganizerSchedulePage(),
             "scoreboard": OrganizerScoreboardPage(),
+            "player_reporting": PlayerReportingPage(),
+            "complaints": OrganizerComplaintsPage(),
+            "player_kits": OrganizerKitsPage(),
         }
 
         for page in self.pages.values():

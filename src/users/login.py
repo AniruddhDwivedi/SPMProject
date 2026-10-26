@@ -5,20 +5,17 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QLabel,
-    QComboBox,
     QFrame,
 )
-
+from src.components.wave_heading import WaveHeading
 
 class LoginPage(QWidget):
-
-    login_successful = pyqtSignal(dict)
+    login_successful = pyqtSignal(object)
 
     def __init__(self, auth_service):
         super().__init__()
 
         self.auth_service = auth_service
-
         self.setup_ui()
 
     def setup_ui(self):
@@ -27,35 +24,28 @@ class LoginPage(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Login card
         card = QFrame()
         card.setObjectName("login_card")
-        card.setFixedWidth(400)
+        card.setFixedWidth(600)
 
         card_layout = QVBoxLayout(card)
         card_layout.setContentsMargins(40, 40, 40, 40)
         card_layout.setSpacing(15)
 
-        title = QLabel("Inter IIT Tournament")
+        title = WaveHeading("Inter VIT Tournament")
         title.setObjectName("title")
 
         subtitle = QLabel("Management System")
         subtitle.setObjectName("subtitle")
 
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Username")
+        self.username_input.setPlaceholderText("Email")
 
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(
             QLineEdit.EchoMode.Password
         )
-
-        self.role_input = QComboBox()
-        self.role_input.addItems([
-            "Player",
-            "Organizer",
-        ])
 
         self.login_button = QPushButton("Login")
         self.login_button.clicked.connect(self.login)
@@ -65,34 +55,50 @@ class LoginPage(QWidget):
         self.message.setAlignment(
             Qt.AlignmentFlag.AlignCenter
         )
+        self.message.setWordWrap(True)
 
         card_layout.addWidget(title)
         card_layout.addWidget(subtitle)
         card_layout.addSpacing(20)
         card_layout.addWidget(self.username_input)
         card_layout.addWidget(self.password_input)
-        card_layout.addWidget(self.role_input)
         card_layout.addWidget(self.login_button)
         card_layout.addWidget(self.message)
 
         layout.addWidget(card)
 
     def login(self):
-        username = self.username_input.text().strip()
+        email = self.username_input.text().strip()
         password = self.password_input.text()
 
-        user = self.auth_service.login(username, password)
-
-        if user is None:
-            self.message.setText("Invalid username or password.")
+        if not email or not password:
+            self.message.setText(
+                "Please enter your email and password."
+            )
             return
 
-        selected_role = self.role_input.currentText().lower()
+        self.login_button.setEnabled(False)
+        self.login_button.setText("Logging in...")
 
-        if user["role"] != selected_role:
-            self.message.setText("Selected role does not match the account.")
-            return
+        try:
+            user = self.auth_service.login(email, password)
 
-        self.message.setText("")
+            if user is None:
+                self.message.setText(
+                    "Login failed. Check your credentials "
+                    "and user profile."
+                )
+                return
 
-        self.login_successful.emit(user)
+            self.message.clear()
+            self.login_successful.emit(user)
+
+        except Exception as error:
+            print("LOGIN PAGE ERROR:", repr(error))
+            self.message.setText(
+                "An error occurred while logging in."
+            )
+
+        finally:
+            self.login_button.setEnabled(True)
+            self.login_button.setText("Login")

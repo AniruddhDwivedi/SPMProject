@@ -5,32 +5,20 @@ from PyQt6.QtWidgets import (
 )
 
 from src.components.schedule_table import ScheduleTable
-from src.services.schedule_service import ScheduleService
-
+from src.components.wave_heading import WaveHeading
 
 class PlayerSchedulePage(QWidget):
-
     def __init__(self):
         super().__init__()
-
-        self.schedule_service = ScheduleService()
 
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
-        title = QLabel("View Schedule")
-        title.setObjectName("page_title")
+        title = WaveHeading("Tournament Schedule")
+
+        self.schedule_table = ScheduleTable()
 
         layout.addWidget(title)
-
-        self.schedule_table = ScheduleTable(
-            editable=False
-        )
-
         layout.addWidget(self.schedule_table)
-
-        matches = self.schedule_service.get_matches()
-
-        self.schedule_table.set_matches(matches)
